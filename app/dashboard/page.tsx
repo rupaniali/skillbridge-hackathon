@@ -21,6 +21,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      
+      {/* Header / Navbar */}
       <nav className="bg-[#0A192F] text-white p-4 flex justify-between items-center shadow-md">
         <Link href="/" className="text-2xl font-extrabold flex items-center gap-2 tracking-tight cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-[#00d09c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -38,10 +40,14 @@ export default function DashboardPage() {
         </div>
       </nav>
 
+      {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold text-[#0A192F] mb-8">Your Learning Path</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* ✨ Yahan grid-cols-2 kiya hai taaki 4 cards (2x2) properly dikhein */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Card 1: Verified Skills */}
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
             <div className="text-3xl mb-4">💻</div>
             <h2 className="text-xl font-bold text-[#0A192F] mb-2">Verified Skills</h2>
@@ -70,6 +76,7 @@ export default function DashboardPage() {
             )}
           </div>
 
+          {/* Card 2: Recommended Jobs */}
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
             <div className="text-3xl mb-4">🚀</div>
             <h2 className="text-xl font-bold text-[#0A192F] mb-2">Recommended Jobs</h2>
@@ -81,6 +88,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Card 3: Resume Builder */}
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
             <div className="text-3xl mb-4">📄</div>
             <h2 className="text-xl font-bold text-[#0A192F] mb-2">Resume Builder</h2>
@@ -91,6 +99,19 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
+
+          {/* ✨ Card 4: NEW MOCK TEST CARD */}
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
+            <div className="text-3xl mb-4">📝</div>
+            <h2 className="text-xl font-bold text-[#0A192F] mb-2">Skill Mock Test</h2>
+            <p className="text-gray-500 text-sm mb-8">Take interactive technical tests to boost your verified profile rating.</p>
+            <div className="mt-auto">
+              <Link href="/dashboard/mock-test" className="text-[#00d09c] font-bold hover:underline cursor-pointer flex items-center gap-1">
+                Start Test <span>→</span>
+              </Link>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
