@@ -7,12 +7,43 @@ import { useRouter } from "next/navigation";
 export default function DashboardPage() {
   const [githubUser, setGithubUser] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleVerify = () => {
-    if (githubUser.trim() !== "") {
+  // 🚀 GitHub API verification function
+  const handleGitHubVerification = async (githubUsername: string) => {
+    if (!githubUsername.trim()) {
+      alert("Please enter a GitHub username");
+      return false;
+    }
+
+    try {
+      // GitHub Public API call karke check karega ki user exist karta hai ya nahi
+      const response = await fetch(`https://api.github.com/users/${githubUsername.trim()}`);
+      
+      if (!response.ok) {
+        alert("Invalid GitHub username! This account does not exist on GitHub.");
+        return false;
+      }
+
+      const githubData = await response.json();
+      alert(`GitHub account verified successfully: ${githubData.login}`);
+      return true;
+
+    } catch (error) {
+      console.error("Error verifying GitHub:", error);
+      alert("Failed to verify GitHub account. Please try again.");
+      return false;
+    }
+  };
+
+  const handleVerify = async () => {
+    setLoading(true);
+    const isValid = await handleGitHubVerification(githubUser);
+    if (isValid) {
       setIsVerified(true);
     }
+    setLoading(false);
   };
 
   const handleLogout = () => {
@@ -44,7 +75,6 @@ export default function DashboardPage() {
       <main className="max-w-6xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold text-[#0A192F] mb-8">Your Learning Path</h1>
 
-        {/* ✨ Yahan grid-cols-2 kiya hai taaki 4 cards (2x2) properly dikhein */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Card 1: Verified Skills */}
@@ -62,14 +92,18 @@ export default function DashboardPage() {
                   onChange={(e) => setGithubUser(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-2 w-full text-sm text-black focus:outline-none focus:border-[#00d09c]" 
                 />
-                <button onClick={handleVerify} className="bg-[#0A192F] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-gray-800 transition">
-                  Verify
+                <button 
+                  onClick={handleVerify} 
+                  disabled={loading}
+                  className="bg-[#0A192F] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-gray-800 transition cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? "Checking..." : "Verify"}
                 </button>
               </div>
             ) : (
               <div className="mt-auto bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
                 <span className="font-semibold text-sm">✅ {githubUser} Linked</span>
-                <button onClick={() => setIsVerified(false)} className="text-xs text-gray-500 hover:text-black underline">
+                <button onClick={() => setIsVerified(false)} className="text-xs text-gray-500 hover:text-black underline cursor-pointer">
                   Change
                 </button>
               </div>
@@ -100,7 +134,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ✨ Card 4: NEW MOCK TEST CARD */}
+          {/* Card 4: Skill Mock Test */}
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
             <div className="text-3xl mb-4">📝</div>
             <h2 className="text-xl font-bold text-[#0A192F] mb-2">Skill Mock Test</h2>
