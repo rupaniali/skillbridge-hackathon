@@ -1,14 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../supabase"; // Adjust path if needed based on your folder structure
 
 export default function DashboardPage() {
+  const [userName, setUserName] = useState("Hacker");
   const [githubUser, setGithubUser] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // 🚀 Supabase se logged-in user ka naam fetch karne ke liye
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          if (user.user_metadata?.name) {
+            setUserName(user.user_metadata.name);
+          } else if (user.user_metadata?.full_name) {
+            setUserName(user.user_metadata.full_name);
+          } else {
+            const emailName = user.email?.split('@')[0];
+            if (emailName) setUserName(emailName);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   // 🚀 GitHub API verification function
   const handleGitHubVerification = async (githubUsername: string) => {
@@ -18,7 +43,6 @@ export default function DashboardPage() {
     }
 
     try {
-      // GitHub Public API call karke check karega ki user exist karta hai ya nahi
       const response = await fetch(`https://api.github.com/users/${githubUsername.trim()}`);
       
       if (!response.ok) {
@@ -46,7 +70,8 @@ export default function DashboardPage() {
     setLoading(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     router.push("/");
   };
 
@@ -64,7 +89,7 @@ export default function DashboardPage() {
           <span className="text-white">Skill</span><span className="text-[#00d09c]">Bridge</span>
         </Link>
         <div className="flex items-center gap-4">
-          <span className="text-sm hidden sm:block">Welcome, Hacker!</span>
+          <span className="text-sm hidden sm:block font-medium">Welcome, {userName}!</span>
           <button onClick={handleLogout} className="bg-[#00d09c] text-[#0A192F] px-4 py-2 rounded font-bold text-sm hover:bg-teal-400 transition cursor-pointer">
             Logout
           </button>
