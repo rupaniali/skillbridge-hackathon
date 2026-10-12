@@ -50,13 +50,19 @@ export default function LoginPage() {
         if (signUpError) {
           setError(signUpError.message);
         } else {
-          // Save to custom users table
+          // Save to custom users table with "Verified" status
           await supabase.from("users").upsert([
-            { email: email, name: name, phone: phone, status: "Pending OTP" }
+            { email: email, name: name, phone: phone, status: "Verified" }
           ], { onConflict: "email" });
 
-          setSuccessMsg("Registration initiated! Please check your real email for the verification code.");
-          setAuthMode("verify"); // Move to OTP Verification step
+          // Yahan OTP verification screen par bhejne ke bajaye
+          // seedha success message dekar login karwa denge.
+          setSuccessMsg("Registration successful! Logging you in...");
+          
+          // Turant dashboard par bhej do
+          setTimeout(() => {
+            router.push("/dashboard"); 
+          }, 1500);
         }
       } 
       else if (authMode === "verify") {
@@ -66,7 +72,7 @@ export default function LoginPage() {
           return;
         }
 
-        // 2. Verify OTP Token
+        // 2. Verify OTP Token (Ab iski zaroorat signup mein nahi padegi)
         const { data, error: verifyError } = await supabase.auth.verifyOtp({
           email,
           token: otpCode,
@@ -76,7 +82,6 @@ export default function LoginPage() {
         if (verifyError) {
           setError("Invalid or expired verification code. Please check and try again.");
         } else {
-          // Update database status to Verified
           await supabase.from("users").update({ status: "Verified" }).eq("email", email);
           
           setSuccessMsg("Email verified successfully! You can now sign in.");
@@ -285,7 +290,7 @@ export default function LoginPage() {
             className="w-full bg-[#00d09c] text-[#0F172A] font-bold py-3 px-4 rounded hover:bg-teal-400 transition mt-6 cursor-pointer disabled:opacity-50"
           >
             {loading ? "Processing..." : 
-             authMode === "signup" ? "Proceed to Verify OTP →" : 
+             authMode === "signup" ? "Create Account →" : 
              authMode === "verify" ? "Confirm Verification Code →" :
              authMode === "forgot" ? "Send Reset Link →" : 
              "Sign In →"}
