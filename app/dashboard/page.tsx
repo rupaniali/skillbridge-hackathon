@@ -1,59 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../supabase"; // Adjust path if needed based on your folder structure
+import { useState } from "react";
 
 export default function DashboardPage() {
-  const [userName, setUserName] = useState("Hacker");
   const [githubUser, setGithubUser] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  // 🚀 Supabase se logged-in user ka naam fetch karne ke liye
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          if (user.user_metadata?.name) {
-            setUserName(user.user_metadata.name);
-          } else if (user.user_metadata?.full_name) {
-            setUserName(user.user_metadata.full_name);
-          } else {
-            const emailName = user.email?.split('@')[0];
-            if (emailName) setUserName(emailName);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
-  // 🚀 GitHub API verification function
   const handleGitHubVerification = async (githubUsername: string) => {
     if (!githubUsername.trim()) {
       alert("Please enter a GitHub username");
       return false;
     }
-
     try {
       const response = await fetch(`https://api.github.com/users/${githubUsername.trim()}`);
-      
       if (!response.ok) {
-        alert("Invalid GitHub username! This account does not exist on GitHub.");
+        alert("Invalid GitHub username!");
         return false;
       }
-
       const githubData = await response.json();
       alert(`GitHub account verified successfully: ${githubData.login}`);
       return true;
-
     } catch (error) {
       console.error("Error verifying GitHub:", error);
       alert("Failed to verify GitHub account. Please try again.");
@@ -64,55 +31,29 @@ export default function DashboardPage() {
   const handleVerify = async () => {
     setLoading(true);
     const isValid = await handleGitHubVerification(githubUser);
-    if (isValid) {
-      setIsVerified(true);
-    }
+    if (isValid) setIsVerified(true);
     setLoading(false);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       
-      {/* Header / Navbar */}
-      <nav className="bg-[#0A192F] text-white p-4 flex justify-between items-center shadow-md">
-        <Link href="/" className="text-2xl font-extrabold flex items-center gap-2 tracking-tight cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-[#00d09c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-          <span className="text-white">Skill</span><span className="text-[#00d09c]">Bridge</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-sm hidden sm:block font-medium">Welcome, {userName}!</span>
-          <button onClick={handleLogout} className="bg-[#00d09c] text-[#0A192F] px-4 py-2 rounded font-bold text-sm hover:bg-teal-400 transition cursor-pointer">
-            Logout
-          </button>
-        </div>
-      </nav>
+      {/* Navbar yahan se hata diya gaya hai kyunki wo layout.tsx se aa raha hai */}
 
-      {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6 md:p-10">
-        <h1 className="text-3xl font-bold text-[#0A192F] mb-8">Your Learning Path</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-10 text-center shadow-sm">
+          <h1 className="text-2xl font-bold text-[#0A192F] mb-4">Dashboard Overview</h1>
+          <p className="text-gray-500 mb-8 max-w-lg mx-auto">Your main navigation is now securely placed at the top.</p>
           
-          {/* Card 1: Verified Skills */}
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
-            <div className="text-3xl mb-4">💻</div>
-            <h2 className="text-xl font-bold text-[#0A192F] mb-2">Verified Skills</h2>
-            <p className="text-gray-500 text-sm mb-6">Link your GitHub to prove your coding experience.</p>
+          <div className="max-w-md mx-auto bg-gray-50 p-6 rounded-lg border border-gray-200 text-left">
+            <h3 className="font-bold text-[#0A192F] mb-2 flex items-center gap-2">💻 Link GitHub Account</h3>
+            <p className="text-xs text-gray-500 mb-4">Verify your coding experience to boost your profile.</p>
             
             {!isVerified ? (
-              <div className="flex flex-col sm:flex-row gap-2 mt-auto">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="text" 
-                  placeholder="GitHub Username" 
+                  placeholder="Username" 
                   value={githubUser}
                   onChange={(e) => setGithubUser(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-2 w-full text-sm text-black focus:outline-none focus:border-[#00d09c]" 
@@ -120,57 +61,18 @@ export default function DashboardPage() {
                 <button 
                   onClick={handleVerify} 
                   disabled={loading}
-                  className="bg-[#0A192F] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-gray-800 transition cursor-pointer disabled:opacity-50"
+                  className="bg-[#0A192F] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-gray-800 transition cursor-pointer"
                 >
                   {loading ? "Checking..." : "Verify"}
                 </button>
               </div>
             ) : (
-              <div className="mt-auto bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
                 <span className="font-semibold text-sm">✅ {githubUser} Linked</span>
-                <button onClick={() => setIsVerified(false)} className="text-xs text-gray-500 hover:text-black underline cursor-pointer">
-                  Change
-                </button>
+                <button onClick={() => setIsVerified(false)} className="text-xs text-gray-500 hover:text-black underline cursor-pointer">Change</button>
               </div>
             )}
           </div>
-
-          {/* Card 2: Recommended Jobs */}
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
-            <div className="text-3xl mb-4">🚀</div>
-            <h2 className="text-xl font-bold text-[#0A192F] mb-2">Recommended Jobs</h2>
-            <p className="text-gray-500 text-sm mb-8">AI-matched job opportunities based on your updated profile.</p>
-            <div className="mt-auto">
-              <Link href="/jobs" className="text-[#00d09c] font-bold hover:underline cursor-pointer flex items-center gap-1">
-                Explore Jobs <span>→</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Card 3: Resume Builder */}
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
-            <div className="text-3xl mb-4">📄</div>
-            <h2 className="text-xl font-bold text-[#0A192F] mb-2">Resume Builder</h2>
-            <p className="text-gray-500 text-sm mb-8">Generate an ATS-friendly professional resume in one click.</p>
-            <div className="mt-auto">
-              <Link href="/resume" className="text-[#00d09c] font-bold hover:underline cursor-pointer flex items-center gap-1">
-                Build Resume <span>→</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Card 4: Skill Mock Test */}
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col">
-            <div className="text-3xl mb-4">📝</div>
-            <h2 className="text-xl font-bold text-[#0A192F] mb-2">Skill Mock Test</h2>
-            <p className="text-gray-500 text-sm mb-8">Take interactive technical tests to boost your verified profile rating.</p>
-            <div className="mt-auto">
-              <Link href="/dashboard/mock-test" className="text-[#00d09c] font-bold hover:underline cursor-pointer flex items-center gap-1">
-                Start Test <span>→</span>
-              </Link>
-            </div>
-          </div>
-
         </div>
       </main>
     </div>

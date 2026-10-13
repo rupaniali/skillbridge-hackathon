@@ -37,10 +37,10 @@ export default function JobsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[#0A192F] mb-4">
-            Explore Entry-Level Jobs
+            Explore Entry Level Jobs
           </h1>
           <p className="text-gray-600 text-lg">
-            Aapke skills se match karti hui best opportunities.
+            The best opportunities that match your skills.
           </p>
         </div>
 
