@@ -64,21 +64,9 @@ export default function MockTestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Navbar */}
-      <nav className="bg-[#0A192F] text-white p-4 flex justify-between items-center shadow-md">
-        <Link href="/dashboard" className="text-2xl font-extrabold flex items-center gap-2 tracking-tight cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-[#00d09c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-          <span className="text-white">Skill</span><span className="text-[#00d09c]">Bridge</span>
-        </Link>
-        <Link href="/dashboard" className="text-sm font-semibold text-gray-300 hover:text-white transition">
-          ← Back to Dashboard
-        </Link>
-      </nav>
+    <div className="min-h-screen bg-gray-50 text-gray-900 pt-6">
+      
+      {/* Purana dark blue navbar yahan se poori tarah hata diya gaya hai */}
 
       {/* Main Container */}
       <main className="max-w-3xl mx-auto p-6 md:p-12">

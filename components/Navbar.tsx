@@ -2,18 +2,31 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../app/supabase"; // Adjust path based on your folder structure
+import { useRouter, usePathname } from "next/navigation"; 
+import { supabase } from "../app/supabase"; // Apna path verify kar lena
 
 export default function Navbar() {
-  const [userName, setUserName] = useState("Hacker");
+  const [userName, setUserName] = useState("");
   const router = useRouter();
+  const pathname = usePathname();
+
+  // 1. Yahan humne Admin pages ki ek nayi condition add kar di hai
+  const isPublicPage = pathname === "/" || pathname === "/login";
+  const isAdminPage = pathname.startsWith("/admin"); // Agar URL '/admin' hai toh
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const checkSecurityAndUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        // 🔒 SECURITY CHECK: Ab yeh guard Admin pages ko wapas /login par redirect NAHI karega
+        if (!session && !isPublicPage && !isAdminPage) {
+          router.push("/login");
+          return;
+        }
+
+        if (session?.user) {
+          const user = session.user;
           if (user.user_metadata?.name) {
             setUserName(user.user_metadata.name);
           } else if (user.user_metadata?.full_name) {
@@ -24,19 +37,25 @@ export default function Navbar() {
           }
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error fetching user session:", error);
       }
     };
-    fetchUserProfile();
-  }, []);
+
+    checkSecurityAndUser();
+  }, [pathname, router, isPublicPage, isAdminPage]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/");
   };
 
+  // 👁️ VISIBILITY CHECK: Agar Home, Login, YA Admin page hai, toh yeh student wala Navbar mat dikhao
+  if (isPublicPage || isAdminPage) {
+    return null;
+  }
+
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm w-full sticky top-0 z-50">
+    <nav className="print:hidden bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm w-full sticky top-0 z-50">
       
       {/* Left: Brand Logo */}
       <div className="flex items-center">
