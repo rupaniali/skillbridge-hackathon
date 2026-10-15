@@ -6,72 +6,123 @@ export default function DashboardPage() {
   const [githubUser, setGithubUser] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+  // 🚀 Naya state: GitHub ka saara data yahan store hoga
+  const [githubData, setGithubData] = useState<any>(null); 
 
-  const handleGitHubVerification = async (githubUsername: string) => {
-    if (!githubUsername.trim()) {
+  const handleGitHubVerification = async () => {
+    if (!githubUser.trim()) {
       alert("Please enter a GitHub username");
-      return false;
+      return;
     }
+    setLoading(true);
     try {
-      const response = await fetch(`https://api.github.com/users/${githubUsername.trim()}`);
+      const response = await fetch(`https://api.github.com/users/${githubUser.trim()}`);
       if (!response.ok) {
-        alert("Invalid GitHub username!");
-        return false;
+        alert("Invalid GitHub username! Please check and try again.");
+        setLoading(false);
+        return;
       }
-      const githubData = await response.json();
-      alert(`GitHub account verified successfully: ${githubData.login}`);
-      return true;
+      
+      // Data fetch karke state mein save kar rahe hain
+      const data = await response.json();
+      setGithubData(data);
+      setIsVerified(true);
     } catch (error) {
       console.error("Error verifying GitHub:", error);
       alert("Failed to verify GitHub account. Please try again.");
-      return false;
     }
-  };
-
-  const handleVerify = async () => {
-    setLoading(true);
-    const isValid = await handleGitHubVerification(githubUser);
-    if (isValid) setIsVerified(true);
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       
-      {/* Navbar yahan se hata diya gaya hai kyunki wo layout.tsx se aa raha hai */}
-
       <main className="max-w-6xl mx-auto p-6 md:p-10">
         <div className="bg-white border border-gray-200 rounded-lg p-10 text-center shadow-sm">
           <h1 className="text-2xl font-bold text-[#0A192F] mb-4">Dashboard Overview</h1>
-          <p className="text-gray-500 mb-8 max-w-lg mx-auto">Your main navigation is now securely placed at the top.</p>
+          <p className="text-gray-500 mb-8 max-w-lg mx-auto">Manage your profile, skills, and platform integrations.</p>
           
           <div className="max-w-md mx-auto bg-gray-50 p-6 rounded-lg border border-gray-200 text-left">
             <h3 className="font-bold text-[#0A192F] mb-2 flex items-center gap-2">💻 Link GitHub Account</h3>
-            <p className="text-xs text-gray-500 mb-4">Verify your coding experience to boost your profile.</p>
+            <p className="text-xs text-gray-500 mb-5">Verify your coding experience to boost your profile visibility.</p>
             
             {!isVerified ? (
               <div className="flex flex-col sm:flex-row gap-2">
                 <input 
                   type="text" 
-                  placeholder="Username" 
+                  placeholder="Enter GitHub Username (e.g. dexter)" 
                   value={githubUser}
                   onChange={(e) => setGithubUser(e.target.value)}
-                  className="border border-gray-300 rounded px-3 py-2 w-full text-sm text-black focus:outline-none focus:border-[#00d09c]" 
+                  onKeyDown={(e) => e.key === 'Enter' && handleGitHubVerification()}
+                  className="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm text-gray-900 font-medium focus:outline-none focus:border-[#00d09c]" 
                 />
                 <button 
-                  onClick={handleVerify} 
+                  onClick={handleGitHubVerification} 
                   disabled={loading}
-                  className="bg-[#0A192F] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-gray-800 transition cursor-pointer"
+                  className="bg-[#0A192F] text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition cursor-pointer whitespace-nowrap"
                 >
-                  {loading ? "Checking..." : "Verify"}
+                  {loading ? "Checking..." : "Verify Now"}
                 </button>
               </div>
             ) : (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
-                <span className="font-semibold text-sm">✅ {githubUser} Linked</span>
-                <button onClick={() => setIsVerified(false)} className="text-xs text-gray-500 hover:text-black underline cursor-pointer">Change</button>
+              // 🚀 SMART DEVELOPER CARD UI
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm transition-all animate-fade-in-up">
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <img 
+                    src={githubData?.avatar_url} 
+                    alt="GitHub Avatar" 
+                    className="w-16 h-16 rounded-full border-2 border-[#00d09c] p-0.5 shadow-sm" 
+                  />
+                  <div>
+                    <h4 className="font-extrabold text-[#0A192F] text-lg leading-tight">
+                      {githubData?.name || githubData?.login}
+                    </h4>
+                    <a 
+                      href={githubData?.html_url} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="text-sm font-bold text-[#00d09c] hover:underline"
+                    >
+                      @{githubData?.login}
+                    </a>
+                  </div>
+                </div>
+
+                {githubData?.bio && (
+                  <p className="text-sm text-gray-600 mb-5 italic border-l-2 border-gray-200 pl-3">
+                    "{githubData.bio}"
+                  </p>
+                )}
+                
+                <div className="grid grid-cols-2 gap-3 text-center mb-5">
+                  <div className="bg-gray-50 py-3 rounded-lg border border-gray-100">
+                    <div className="text-2xl font-extrabold text-[#0A192F]">{githubData?.public_repos}</div>
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mt-1">Repositories</div>
+                  </div>
+                  <div className="bg-gray-50 py-3 rounded-lg border border-gray-100">
+                    <div className="text-2xl font-extrabold text-[#0A192F]">{githubData?.followers}</div>
+                    <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mt-1">Followers</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+                  <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded border border-green-100 flex items-center gap-1">
+                    ✅ Verified Developer
+                  </span>
+                  <button 
+                    onClick={() => {
+                      setIsVerified(false);
+                      setGithubUser("");
+                    }} 
+                    className="text-xs font-bold text-gray-400 hover:text-red-500 transition cursor-pointer"
+                  >
+                    Unlink Account
+                  </button>
+                </div>
               </div>
             )}
+
           </div>
         </div>
       </main>
