@@ -6,7 +6,6 @@ export default function DashboardPage() {
   const [githubUser, setGithubUser] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
-  // 🚀 Naya state: GitHub ka saara data yahan store hoga
   const [githubData, setGithubData] = useState<any>(null); 
 
   const handleGitHubVerification = async () => {
@@ -23,7 +22,6 @@ export default function DashboardPage() {
         return;
       }
       
-      // Data fetch karke state mein save kar rahe hain
       const data = await response.json();
       setGithubData(data);
       setIsVerified(true);
@@ -36,7 +34,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
       <main className="max-w-6xl mx-auto p-6 md:p-10">
         <div className="bg-white border border-gray-200 rounded-lg p-10 text-center shadow-sm">
           <h1 className="text-2xl font-bold text-[#0A192F] mb-4">Dashboard Overview</h1>
@@ -65,7 +62,6 @@ export default function DashboardPage() {
                 </button>
               </div>
             ) : (
-              // 🚀 SMART DEVELOPER CARD UI
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm transition-all animate-fade-in-up">
                 
                 <div className="flex items-center gap-4 mb-4">

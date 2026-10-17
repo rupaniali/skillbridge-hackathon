@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// 1. Yahan humne Navbar ko import kiya hai
+// 1. Navbar ko wapas import kiya hai taaki yeh har page par apply ho
 import Navbar from "../components/Navbar"; 
 
 const geistSans = Geist({
@@ -15,7 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Browser tab ka naam 'Create Next App' se badal kar SkillBridge kar diya hai
 export const metadata: Metadata = {
   title: "SkillBridge | Professional Portfolio",
   description: "Generate professional resumes and mock tests",
@@ -29,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col">
         
-        {/* 2. Navbar yahan add kar diya, ab yeh har page par dikhega! */}
+        {/* 2. Yahan Navbar laga diya hai. Ab yeh Jobs, Resume aur Mock Test par perfectly dikhega! */}
         <Navbar />
         
         {/* Yeh aapke baaki pages ka content hai */}
