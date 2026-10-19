@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { supabase } from "../supabase"; // Path check kar lena agar zarurat ho
 
 export default function ResumePage() {
   const [data, setData] = useState({
@@ -18,6 +20,44 @@ export default function ResumePage() {
     expDesc: "Built a weather-driven AI Digital Twin simulation layer. Developed SkillBridge platform featuring GitHub profile verification, Next.js route protection, and Supabase authentication."
   });
 
+  // 🚀 Supabase se naye features ka data store karne ke liye states
+  const [caseStudies, setCaseStudies] = useState<any[]>([]);
+  const [bugs, setBugs] = useState<any[]>([]);
+  const [endorsements, setEndorsements] = useState<any[]>([]);
+
+  // Page load hote hi database se data fetch karna
+  useEffect(() => {
+    const fetchResumeData = async () => {
+      const { data: authData } = await supabase.auth.getSession();
+      if (authData?.session?.user) {
+        const userId = authData.session.user.id;
+
+        // 1. Fetch Case Studies
+        const { data: csData } = await supabase
+          .from("case_studies")
+          .select("*")
+          .eq("user_id", userId);
+        if (csData) setCaseStudies(csData);
+
+        // 2. Fetch Bugs
+        const { data: bugData } = await supabase
+          .from("toughest_bugs")
+          .select("*")
+          .eq("user_id", userId);
+        if (bugData) setBugs(bugData);
+
+        // 3. Fetch Endorsements
+        const { data: endData } = await supabase
+          .from("peer_endorsements")
+          .select("*")
+          .eq("endorsed_user_id", userId);
+        if (endData) setEndorsements(endData);
+      }
+    };
+
+    fetchResumeData();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -26,6 +66,12 @@ export default function ResumePage() {
     window.print();
   };
 
+  // Endorsements ko group karne ke liye logic
+  const groupedEndorsements = endorsements.reduce((acc, curr) => {
+    acc[curr.skill_name] = (acc[curr.skill_name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 print:p-0 print:m-0 print:bg-white">
       
@@ -33,7 +79,7 @@ export default function ResumePage() {
       <div className="max-w-7xl mx-auto mb-8 flex justify-between items-center print:hidden">
         <div>
           <h1 className="text-3xl font-bold text-[#0A192F]">Live Resume Builder</h1>
-          <p className="text-gray-500 text-sm mt-1">Fill details on the left, see preview on the right.</p>
+          <p className="text-gray-500 text-sm mt-1">Fill details on the left, see preview on the right (Includes your Dashboard Case Studies & Bugs).</p>
         </div>
         <button 
           onClick={handlePrint}
@@ -79,16 +125,15 @@ export default function ResumePage() {
         </div>
 
         {/* ================= RIGHT SIDE: A4 LIVE PREVIEW ================= */}
-        {/* Is div ko fix kiya gaya hai taaki margin/padding ekdum perfect A4 jaisi aaye */}
         <div className="flex justify-center print:block print:w-full print:m-0">
           <div className="bg-white p-12 md:p-14 border border-gray-200 shadow-lg w-full max-w-[210mm] min-h-[297mm] print:shadow-none print:border-none print:p-12 print:mx-auto">
             
             {/* Header */}
-            <div className="border-b-2 border-gray-800 pb-5 mb-8">
+            <div className="border-b-2 border-gray-800 pb-5 mb-6">
               <h1 className="text-4xl font-extrabold text-gray-900 uppercase tracking-tight">{data.name || "Your Name"}</h1>
               <p className="text-xl text-[#00d09c] font-semibold mt-2">{data.role}</p>
               
-              <div className="flex flex-wrap gap-x-6 gap-y-2 mt-5 text-sm text-gray-700 font-medium">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm text-gray-700 font-medium">
                 {data.email && <span className="flex items-center gap-1">📧 {data.email}</span>}
                 {data.phone && <span className="flex items-center gap-1">📱 {data.phone}</span>}
                 {data.github && <span className="flex items-center gap-1">💻 {data.github}</span>}
@@ -96,35 +141,83 @@ export default function ResumePage() {
               </div>
             </div>
 
-            {/* Skills Section */}
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-2 mb-4">Technical Skills</h2>
-              <p className="text-gray-800 font-medium leading-relaxed">{data.skills}</p>
+            {/* Skills & Endorsements */}
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Technical Skills & Verified Vouches</h2>
+              <p className="text-gray-800 font-medium mb-2">{data.skills}</p>
+              
+              {/* Endorsements Badges on Resume */}
+              {Object.keys(groupedEndorsements).length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {Object.entries(groupedEndorsements).map(([skill, count]) => (
+                    <span key={skill} className="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded border border-emerald-200">
+                      ✓ {skill} ({String(count)} Peer Vouches)
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Experience / Projects Section */}
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-2 mb-5">Experience & Projects</h2>
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">Experience & Projects</h2>
               
-              <div>
-                <div className="flex justify-between items-baseline mb-2">
-                  <h3 className="text-lg font-bold text-gray-900">{data.expCompany}</h3>
-                  <span className="text-sm font-bold text-[#00d09c]">{data.expDuration}</span>
+              <div className="mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="text-base font-bold text-gray-900">{data.expCompany}</h3>
+                  <span className="text-xs font-bold text-[#00d09c]">{data.expDuration}</span>
                 </div>
-                <p className="text-md font-semibold text-gray-700 italic mb-3">{data.expRole}</p>
-                <ul className="list-disc list-outside ml-6 text-gray-700 text-sm leading-relaxed space-y-1">
+                <p className="text-sm font-semibold text-gray-700 italic mb-2">{data.expRole}</p>
+                <ul className="list-disc list-outside ml-5 text-gray-700 text-xs leading-relaxed space-y-1">
                   <li>{data.expDesc}</li>
                 </ul>
               </div>
             </div>
 
+            {/* 🚀 1. Private Case Studies (NDA) Section on Resume */}
+            {caseStudies.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">Private Case Studies (NDA)</h2>
+                <div className="space-y-3">
+                  {caseStudies.map((cs) => (
+                    <div key={cs.id}>
+                      <div className="flex justify-between items-baseline">
+                        <h3 className="text-sm font-bold text-gray-900">{cs.title}</h3>
+                        <span className="text-[11px] font-bold text-[#00d09c] bg-emerald-50 px-2 py-0.5 rounded">{cs.tech_stack}</span>
+                      </div>
+                      <p className="text-xs text-gray-700 leading-relaxed mt-1">{cs.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 🚀 2. Toughest Bugs Fixed Section on Resume */}
+            {bugs.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">Toughest Bugs Fixed</h2>
+                <div className="space-y-3">
+                  {bugs.map((b) => (
+                    <div key={b.id}>
+                      <div className="flex justify-between items-baseline">
+                        <h3 className="text-sm font-bold text-gray-900">{b.bug_title}</h3>
+                        <span className="text-[11px] font-semibold text-gray-500">Fixed in: {b.time_taken}</span>
+                      </div>
+                      <p className="text-xs text-gray-700 mt-0.5"><strong className="text-gray-900">Problem:</strong> {b.the_problem}</p>
+                      <p className="text-xs text-gray-700 mt-0.5"><strong className="text-gray-900">Solution:</strong> {b.the_solution}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Education Section */}
             <div>
-              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-2 mb-5">Education</h2>
-              <div className="flex justify-between items-baseline mb-1">
-                <h3 className="text-lg font-bold text-gray-900">{data.education}</h3>
+              <h2 className="text-lg font-bold text-gray-900 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Education</h2>
+              <div className="flex justify-between items-baseline">
+                <h3 className="text-sm font-bold text-gray-900">{data.education}</h3>
               </div>
-              <p className="text-md font-semibold text-gray-700 italic">{data.eduCollege}</p>
+              <p className="text-xs font-semibold text-gray-700 italic">{data.eduCollege}</p>
             </div>
 
           </div>

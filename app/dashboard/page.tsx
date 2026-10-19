@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-// 🚀 Naya Component Import Kiya (Path apne folder structure ke hisaab se check kar lena)
+// 🚀 Teeno Components Import Kiye (Path apne folder structure ke hisaab se check kar lena)
+import PeerEndorsements from "../../components/PeerEndorsements";
 import CaseStudyManager from "../../components/CaseStudyManager"; 
+import BugManager from "../../components/BugManager"; 
+import HealthMonitor from "../../components/HealthMonitor"; // 🟢 Naya Health Monitor Import
 
 export default function DashboardPage() {
   const [githubUser, setGithubUser] = useState("");
@@ -127,9 +130,12 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* 🚀 Naya Case Study Component Yahan Add Kiya Hai */}
+          {/* 🚀 Teeno Naye Components Yahan Ek Saath Hain */}
           <div className="max-w-4xl mx-auto text-left border-t border-gray-200 mt-10 pt-4">
             <CaseStudyManager />
+            <BugManager />
+            <HealthMonitor /> {/* 🟢 Naya feature */}
+            <PeerEndorsements /> {/* 🤝 Yeh naya add kiya */}
           </div>
 
         </div>
